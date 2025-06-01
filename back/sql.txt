@@ -1,0 +1,79 @@
+create database bank;
+use bank;
+
+create table Users(
+	id int primary key not null auto_increment,
+    name varchar(50),
+    email varchar(50),
+    age int,
+    password varchar(150),
+    balance int,
+    phone_number int,
+    created_at date
+);
+
+create table Accounts(
+	id int primary key not null auto_increment,
+    account_number int unique,
+    currency varchar(10),
+    balance int,
+    status boolean,
+    created_at date,
+    account_limit int,
+    user_id int,
+    foreign key (user_id) references Users(id)
+);
+create table Transactions(
+	id int primary key not null auto_increment,
+    amount int,
+    type varchar(50),
+    transaction_date date,
+    description text,
+    account_id int,
+    foreign key (account_id) references Accounts(id)
+);
+create table Transfers(
+	id int primary key not null auto_increment,
+    amount int,
+    sender int,
+    receiver int,
+    description text,
+    transfer_time timestamp,
+	foreign key (sender) references Accounts(account_number),
+    foreign key (receiver) references Accounts(account_number)
+);
+create table Address(
+	id int primary key not null auto_increment,
+    country varchar(50),
+    city varchar(50),
+    district varchar(50),
+    street varchar(50),
+    postal_code int,
+    additional varchar(50),
+    user_id int,
+    foreign key (user_id) references Users(id)
+);
+
+create table Loans(
+	id int primary key not null auto_increment,
+    name varchar(50),
+    start_date date,
+    duration int,
+    amount int,
+    interest double,
+    user_id int,
+    foreign key (user_id) references Users(id)
+);
+create table DebitCards(
+	id int primary key not null auto_increment,
+    username varchar(50),
+    card_number int,
+    status boolean,
+    card_limit int,
+    pincode int,
+    expire_date date,
+    CVV int,
+    created_at date,
+    account_id int,
+    foreign key (account_id) references Accounts(id)
+);
