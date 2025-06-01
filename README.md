@@ -28,7 +28,7 @@ A modern banking application built with Next.js, Express.js, and MySQL.
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/yourusername/bank-service.git
+git clone https://github.com/Coldlg/bankThing.git
 cd bank-service
 ```
 
