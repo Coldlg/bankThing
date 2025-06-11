@@ -19,7 +19,7 @@ export default function Signup() {
     setError(null);
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/signup`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/signup`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -67,7 +67,7 @@ export default function Signup() {
           </div>
           <h2 className="text-3xl font-bold text-white mb-2">Create Account</h2>
           <p className="text-gray-300 text-sm">
-            Join our secure banking platform
+            Join our Shine banking platform
           </p>
         </div>
 
@@ -101,7 +101,7 @@ export default function Signup() {
                 htmlFor="name"
                 className="block text-sm font-medium text-gray-300 mb-1"
               >
-                Full Name
+                Name
               </label>
               <input
                 id="name"
@@ -109,7 +109,7 @@ export default function Signup() {
                 type="text"
                 required
                 className="appearance-none block w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out"
-                placeholder="Enter your full name"
+                placeholder="Enter your name"
                 value={formData.name}
                 onChange={(e) =>
                   setFormData({ ...formData, name: e.target.value })
@@ -184,26 +184,6 @@ export default function Signup() {
             </div>
           </div>
 
-          <div className="flex items-center">
-            <input
-              id="terms"
-              name="terms"
-              type="checkbox"
-              required
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-            />
-            <label htmlFor="terms" className="ml-2 block text-sm text-gray-300">
-              I agree to the{" "}
-              <a href="#" className="text-blue-400 hover:text-blue-300">
-                Terms of Service
-              </a>{" "}
-              and{" "}
-              <a href="#" className="text-blue-400 hover:text-blue-300">
-                Privacy Policy
-              </a>
-            </label>
-          </div>
-
           <div>
             <button
               type="submit"
@@ -255,36 +235,7 @@ export default function Signup() {
 
         <div className="mt-6">
           <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-600"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-slate-900 text-gray-400">
-                Banking security features
-              </span>
-            </div>
-          </div>
-          <div className="mt-6 flex justify-center space-x-4">
-            <div className="text-gray-400 text-xs">
-              <svg
-                className="w-4 h-4 inline-block mr-1"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" />
-              </svg>
-              SSL Secure
-            </div>
-            <div className="text-gray-400 text-xs">
-              <svg
-                className="w-4 h-4 inline-block mr-1"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z" />
-              </svg>
-              256-bit Encryption
-            </div>
+            <div className="absolute inset-0 flex items-center"></div>
           </div>
         </div>
       </div>

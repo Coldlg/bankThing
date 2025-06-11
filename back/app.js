@@ -21,33 +21,12 @@ app.use(express.json());
 const pool = mysql.createPool({
   host: "localhost",
   user: "root",
-  password: "123456",
+  password: "070707",
   database: "bank",
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
 });
-
-// Test database connection
-async function testConnection() {
-  try {
-    const connection = await pool.getConnection();
-    console.log("Connected to MySQL database as ID " + connection.threadId);
-    connection.release();
-  } catch (err) {
-    console.error("Database connection failed:", err);
-    if (err.code === "ER_ACCESS_DENIED_ERROR") {
-      console.error("Please check your MySQL username and password");
-    } else if (err.code === "ECONNREFUSED") {
-      console.error("Could not connect to MySQL server");
-      console.error("Please make sure MySQL is running");
-    } else if (err.code === "ER_BAD_DB_ERROR") {
-      console.error("Database 'bank' does not exist");
-    }
-  }
-}
-
-testConnection();
 
 // Start the server
 const PORT = process.env.PORT || 4000;
@@ -58,7 +37,7 @@ app.listen(PORT, () => {
 // Routes
 
 // Get all users
-app.get("/api/users", async (req, res) => {
+app.get("/users", async (req, res) => {
   try {
     const [rows] = await pool.query("SELECT * FROM Users");
     res.json(rows);
@@ -69,7 +48,7 @@ app.get("/api/users", async (req, res) => {
 });
 
 // Get a single user by ID
-app.get("/api/users/:id", async (req, res) => {
+app.get("/users/:id", async (req, res) => {
   try {
     const [rows] = await pool.query("SELECT * FROM Users WHERE id = ?", [
       req.params.id,
@@ -85,7 +64,7 @@ app.get("/api/users/:id", async (req, res) => {
 });
 
 // Add a new user (Signup)
-app.post("/api/signup", async (req, res) => {
+app.post("/signup", async (req, res) => {
   const { name, email, age, password, phone_number } = req.body;
 
   try {
@@ -116,7 +95,7 @@ app.post("/api/signup", async (req, res) => {
 });
 
 // User Login
-app.post("/api/login", async (req, res) => {
+app.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
   try {
@@ -175,7 +154,7 @@ const authenticateToken = (req, res, next) => {
 };
 
 // Get user profile
-app.get("/api/user", authenticateToken, async (req, res) => {
+app.get("/user", authenticateToken, async (req, res) => {
   try {
     const [rows] = await pool.query(
       "SELECT id, name, email, age, balance, phone_number, created_at FROM Users WHERE id = ?",
@@ -197,7 +176,7 @@ app.get("/api/user", authenticateToken, async (req, res) => {
 });
 
 // Get user accounts
-app.get("/api/accounts", authenticateToken, async (req, res) => {
+app.get("/accounts", authenticateToken, async (req, res) => {
   try {
     const [rows] = await pool.query(
       "SELECT * FROM Accounts WHERE user_id = ?",
@@ -213,23 +192,16 @@ app.get("/api/accounts", authenticateToken, async (req, res) => {
 });
 
 // Create new account
-app.post("/api/accounts", authenticateToken, async (req, res) => {
-  const { currency, account_limit } = req.body;
+app.post("/accounts", authenticateToken, async (req, res) => {
+  const { currency, balance } = req.body;
 
   try {
     // Generate a unique account number
     const accountNumber = Math.floor(1000000 + Math.random() * 9000000);
 
     const [result] = await pool.query(
-      "INSERT INTO Accounts (account_number, currency, balance, status, account_limit, created_at, user_id) VALUES (?, ?, ?, ?, ?, CURDATE(), ?)",
-      [
-        accountNumber,
-        currency || "USD",
-        0,
-        true,
-        account_limit || 10000,
-        req.user.id,
-      ]
+      "INSERT INTO Accounts (account_number, currency, balance, status, created_at, user_id) VALUES (?, ?, ?, ?, CURDATE(), ?)",
+      [accountNumber, currency || "MNT", balance || 100, true, req.user.id]
     );
 
     const [newAccount] = await pool.query(
@@ -246,7 +218,7 @@ app.post("/api/accounts", authenticateToken, async (req, res) => {
 
 // Get account transactions
 app.get(
-  "/api/accounts/:accountId/transactions",
+  "/accounts/:accountId/transactions",
   authenticateToken,
   async (req, res) => {
     try {
@@ -263,7 +235,7 @@ app.get(
 );
 
 // Create a transfer
-app.post("/api/transfers", authenticateToken, async (req, res) => {
+app.post("/transfers", authenticateToken, async (req, res) => {
   const { amount, receiver_account, description } = req.body;
 
   try {
@@ -294,7 +266,7 @@ app.post("/api/transfers", authenticateToken, async (req, res) => {
         throw new Error("Receiver account not found");
       }
 
-      const receiverAccount = receiverAccounts[0];
+      const receiverAccount = receiverAccounts;
 
       // Check if sender has enough balance
       if (senderAccount.balance < amount) {

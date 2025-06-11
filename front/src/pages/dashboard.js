@@ -16,8 +16,8 @@ export default function Dashboard() {
     description: "",
   });
   const [newAccountData, setNewAccountData] = useState({
-    currency: "USD",
-    account_limit: 10000,
+    currency: "MNT",
+    balance: 100,
   });
   const router = useRouter();
 
@@ -34,7 +34,7 @@ export default function Dashboard() {
 
   const fetchUserData = async (token) => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -53,14 +53,11 @@ export default function Dashboard() {
 
   const fetchAccounts = async (token) => {
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/accounts`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/accounts`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (!res.ok) {
         throw new Error("Failed to fetch accounts");
@@ -78,17 +75,14 @@ export default function Dashboard() {
   const handleCreateAccount = async () => {
     const token = localStorage.getItem("token");
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/accounts`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(newAccountData),
-        }
-      );
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/accounts`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(newAccountData),
+      });
 
       if (!res.ok) {
         throw new Error("Failed to create account");
@@ -104,20 +98,17 @@ export default function Dashboard() {
   const handleTransfer = async () => {
     const token = localStorage.getItem("token");
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/transfers`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            ...transferData,
-            amount: parseInt(transferData.amount),
-          }),
-        }
-      );
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/transfers`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          ...transferData,
+          amount: parseInt(transferData.amount),
+        }),
+      });
 
       if (!res.ok) {
         throw new Error("Failed to process transfer");
@@ -138,6 +129,31 @@ export default function Dashboard() {
   const handleLogout = () => {
     localStorage.removeItem("token");
     router.push("/login");
+  };
+
+  const [transactions, setTractions] = useState([]);
+  // Function to fetch transactions for a specific account
+  const fetchTransactions = async (accountId) => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/accounts/${accountId}/transactions`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch transactions");
+      }
+
+      const data = await response.json();
+      setTractions(data);
+      console.log(data);
+    } catch (error) {
+      console.error("Error fetching transactions:", error);
+    }
   };
 
   if (loading) {
@@ -170,7 +186,7 @@ export default function Dashboard() {
                   />
                 </svg>
                 <span className="ml-2 text-xl font-bold text-white">
-                  SecureBank
+                  ShineBank
                 </span>
               </div>
             </div>
@@ -214,7 +230,7 @@ export default function Dashboard() {
         {/* Welcome Section */}
         <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 mb-8 border border-white/20">
           <h1 className="text-2xl font-bold text-white mb-2">
-            Welcome back, {user?.name}
+            Welcome, {user?.name}
           </h1>
           <p className="text-gray-300">
             Manage your accounts and transactions securely
@@ -250,10 +266,6 @@ export default function Dashboard() {
                   {account.currency} {account.balance.toLocaleString()}
                 </p>
                 <p className="text-sm text-gray-400">Available Balance</p>
-                <p className="text-sm text-gray-400 mt-1">
-                  Limit: {account.currency}{" "}
-                  {account.account_limit.toLocaleString()}
-                </p>
               </div>
               <div className="flex space-x-3">
                 <button
@@ -265,7 +277,10 @@ export default function Dashboard() {
                 >
                   Transfer
                 </button>
-                <button className="flex-1 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-slate-900 transition-colors duration-150">
+                <button
+                  className="flex-1 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-slate-900 transition-colors duration-150"
+                  onClick={() => fetchTransactions(account.id)} // pass the account ID
+                >
                   Details
                 </button>
               </div>
@@ -324,26 +339,26 @@ export default function Dashboard() {
                   }
                   className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
+                  <option value="MNT">MNT</option>
                   <option value="USD">USD</option>
                   <option value="EUR">EUR</option>
-                  <option value="GBP">GBP</option>
                 </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-1">
-                  Account Limit
+                  Balance
                 </label>
                 <input
                   type="number"
-                  value={newAccountData.account_limit}
+                  value={newAccountData.balance}
                   onChange={(e) =>
                     setNewAccountData({
                       ...newAccountData,
-                      account_limit: parseInt(e.target.value),
+                      balance: parseInt(e.target.value),
                     })
                   }
                   className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter account limit"
+                  placeholder="Enter balance"
                 />
               </div>
               <div className="flex space-x-3 mt-6">
@@ -362,6 +377,29 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {transactions.length > 0 && (
+        <div className="mt-4 p-12">
+          <h3 className="text-white text-lg mb-2">Transactions</h3>
+          {transactions
+            .sort((a, b) => b.id - a.id)
+            .map((transaction) => (
+              <div
+                key={transaction.id}
+                className="bg-white/10 p-4 mb-2 rounded-xl text-white"
+              >
+                <p>ID: {transaction.id}</p>
+                <p>Amount: {transaction.amount.toFixed(2)}</p>
+                <p>
+                  Date:{" "}
+                  {new Date(transaction.transaction_date).toLocaleDateString()}
+                </p>
+                <p>Description: {transaction.description}</p>
+                <p>Receiver: {transaction.receiver_account}</p>
+              </div>
+            ))}
         </div>
       )}
 
